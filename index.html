@@ -68,11 +68,11 @@
   <div id="empty" class="empty" style="display:none;">No images found yet.</div>
 
   <script>
-    // 🔧 EDIT THESE 4 LINES:
-    const OWNER       = 'GITHUB_USERNAME';
-    const REPO        = 'REPO_NAME';
-    const BRANCH      = 'main';       // or 'master' etc.
-    const FOLDER_PATH = 'images';     // folder where you keep images
+    const OWNER       = 'bhuvanm25';
+    const REPO        = 'photo-gallery';
+    const BRANCH      = 'main';
+    const FOLDER_PATH = 'images';
+      
 
     const apiUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FOLDER_PATH}?ref=${BRANCH}`;
     const exts = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
