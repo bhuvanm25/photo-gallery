@@ -27,27 +27,15 @@
     .card {
       background: var(--card);
       border-radius: 16px;
-      padding: 8px;
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
       overflow: hidden;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
     }
     .card img {
       display: block;
       width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 12px;
+      height: auto;     /* 👈 keeps original aspect ratio */
+      border-radius: 12px 12px 0 0;
     }
-    .caption {
-      margin-top: 6px;
-      font-size: 13px;
-      color: var(--muted);
-      font-style: italic;
-    }
-    .caption:empty {
-        display: none;
-    }
-
     .empty {
       margin-top: 24px;
       font-size: 14px;
@@ -60,65 +48,52 @@
   <div id="empty" class="empty" style="display:none;">No images found yet.</div>
 
   <script>
-  const OWNER       = 'bhuvanm25';
-  const REPO        = 'photo-gallery';
-  const BRANCH      = 'main';
-  const FOLDER_PATH = 'images';
+    const OWNER       = 'bhuvanm25';
+    const REPO        = 'photo-gallery';
+    const BRANCH      = 'main';
+    const FOLDER_PATH = 'images';
 
-  const captions = {
-    "nyc.jpeg": "100% not a messup, looks like Statue of Liberty"
-  };
+    const apiUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FOLDER_PATH}?ref=${BRANCH}`;
+    const exts = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 
-  const apiUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FOLDER_PATH}?ref=${BRANCH}`;
-  const exts = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
+    function isImage(name) {
+      const lower = name.toLowerCase();
+      return exts.some(ext => lower.endsWith(ext));
+    }
 
-  function isImage(name) {
-    const lower = name.toLowerCase();
-    return exts.some(ext => lower.endsWith(ext));
-  }
-
-  fetch(apiUrl)
-    .then(res => res.json())
-    .then(files => {
-      if (!Array.isArray(files)) {
-        document.getElementById('empty').textContent = 'Error loading images.';
-        document.getElementById('empty').style.display = 'block';
-        return;
-      }
-
-      const images = files.filter(f => f.type === 'file' && isImage(f.name));
-      const gallery = document.getElementById('gallery');
-      const emptyMsg = document.getElementById('empty');
-
-      if (images.length === 0) {
-        emptyMsg.style.display = 'block';
-        return;
-      }
-
-      images.forEach(file => {
-        const imgUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${FOLDER_PATH}/${encodeURIComponent(file.name)}`;
-
-        const card = document.createElement('div');
-        card.className = 'card';
-
-        // Add image
-        const img = document.createElement('img');
-        img.src = imgUrl;
-        img.alt = "photo";
-        img.loading = "lazy";
-        card.appendChild(img);
-
-        // Add caption only if it exists
-        if (captions[file.name]) {
-          const cap = document.createElement('div');
-          cap.className = 'caption';
-          cap.textContent = captions[file.name];
-          card.appendChild(cap);
+    fetch(apiUrl)
+      .then(res => res.json())
+      .then(files => {
+        if (!Array.isArray(files)) {
+          document.getElementById('empty').textContent = 'Error loading images.';
+          document.getElementById('empty').style.display = 'block';
+          return;
         }
 
-        gallery.appendChild(card);
+        const images = files.filter(f => f.type === 'file' && isImage(f.name));
+        const gallery = document.getElementById('gallery');
+        const emptyMsg = document.getElementById('empty');
+
+        if (images.length === 0) {
+          emptyMsg.style.display = 'block';
+          return;
+        }
+
+        images.forEach(file => {
+          const imgUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${FOLDER_PATH}/${encodeURIComponent(file.name)}`;
+
+          const card = document.createElement('div');
+          card.className = 'card';
+
+          const img = document.createElement('img');
+          img.src = imgUrl;
+          img.alt = "photo";
+          img.loading = "lazy";
+          card.appendChild(img);
+
+          gallery.appendChild(card);
+        });
       });
-    });
-</script>
+  </script>
 </body>
 </html>
