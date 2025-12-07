@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>GitHub Folder Image Gallery</title>
+  <title>Bhuvan's Latte Arts</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
@@ -18,16 +18,6 @@
       background: var(--bg);
       color: var(--text);
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    h1 {
-      margin: 0 0 8px;
-      font-size: 24px;
-      font-weight: 600;
-    }
-    p {
-      margin: 0 0 20px;
-      color: var(--muted);
-      font-size: 14px;
     }
     .grid {
       display: grid;
@@ -48,11 +38,11 @@
       object-fit: cover;
       border-radius: 12px;
     }
-    .name {
+    .caption {
       margin-top: 6px;
       font-size: 13px;
       color: var(--muted);
-      word-break: break-word;
+      font-style: italic;
     }
     .empty {
       margin-top: 24px;
@@ -62,62 +52,69 @@
   </style>
 </head>
 <body>
-  <h1>GitHub Image Gallery</h1>
-  <p>Images taken from a folder in this GitHub repo.</p>
   <div id="gallery" class="grid"></div>
   <div id="empty" class="empty" style="display:none;">No images found yet.</div>
 
   <script>
-    const OWNER       = 'bhuvanm25';
-    const REPO        = 'photo-gallery';
-    const BRANCH      = 'main';
-    const FOLDER_PATH = 'images';
-      
+  const OWNER       = 'bhuvanm25';
+  const REPO        = 'photo-gallery';
+  const BRANCH      = 'main';
+  const FOLDER_PATH = 'images';
 
-    const apiUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FOLDER_PATH}?ref=${BRANCH}`;
-    const exts = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
+  const captions = {
+    "nyc.jpeg": "100% not a messup, looks like Statue of Liberty"
+  };
 
-    function isImage(name) {
-      const lower = name.toLowerCase();
-      return exts.some(ext => lower.endsWith(ext));
-    }
+  const apiUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FOLDER_PATH}?ref=${BRANCH}`;
+  const exts = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 
-    fetch(apiUrl)
-      .then(res => res.json())
-      .then(files => {
-        if (!Array.isArray(files)) {
-          console.error('Unexpected response:', files);
-          document.getElementById('empty').textContent = 'Error loading images.';
-          document.getElementById('empty').style.display = 'block';
-          return;
-        }
+  function isImage(name) {
+    const lower = name.toLowerCase();
+    return exts.some(ext => lower.endsWith(ext));
+  }
 
-        const images = files.filter(f => f.type === 'file' && isImage(f.name));
-        const gallery = document.getElementById('gallery');
-        const emptyMsg = document.getElementById('empty');
+  fetch(apiUrl)
+    .then(res => res.json())
+    .then(files => {
+      if (!Array.isArray(files)) {
+        document.getElementById('empty').textContent = 'Error loading images.';
+        document.getElementById('empty').style.display = 'block';
+        return;
+      }
 
-        if (images.length === 0) {
-          emptyMsg.style.display = 'block';
-          return;
-        }
+      const images = files.filter(f => f.type === 'file' && isImage(f.name));
+      const gallery = document.getElementById('gallery');
+      const emptyMsg = document.getElementById('empty');
 
-        images.forEach(file => {
-          const imgUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${FOLDER_PATH}/${encodeURIComponent(file.name)}`;
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.innerHTML = `
-            <img src="${imgUrl}" alt="${file.name}" loading="lazy">
-            <div class="name">${file.name}</div>
-          `;
-          gallery.appendChild(card);
-        });
-      })
-      .catch(err => {
-        console.error(err);
-        const emptyMsg = document.getElementById('empty');
-        emptyMsg.textContent = 'Error loading images.';
+      if (images.length === 0) {
         emptyMsg.style.display = 'block';
+        return;
+      }
+
+      images.forEach(file => {
+        const imgUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${FOLDER_PATH}/${encodeURIComponent(file.name)}`;
+
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        // Add image
+        const img = document.createElement('img');
+        img.src = imgUrl;
+        img.alt = "photo";
+        img.loading = "lazy";
+        card.appendChild(img);
+
+        // Add caption only if it exists
+        if (captions[file.name]) {
+          const cap = document.createElement('div');
+          cap.className = 'caption';
+          cap.textContent = captions[file.name];
+          card.appendChild(cap);
+        }
+
+        gallery.appendChild(card);
       });
-  </script>
+    });
+</script>
 </body>
 </html>
